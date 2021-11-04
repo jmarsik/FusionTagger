@@ -10,6 +10,8 @@ from .Fusion360Utilities.Fusion360CommandBase import Fusion360CommandBase
 # Place your program logic here
 # Delete the line that says "pass" for any method you want to use
 class FusionTaggerCommand(Fusion360CommandBase):
+    last_used_group = ''
+    last_used_name = ''
 
     # Run whenever a user makes any change to a value or selection in the addin UI
     # Commands in here will be run through the Fusion processor and changes will be reflected in  Fusion graphics area
@@ -32,13 +34,17 @@ class FusionTaggerCommand(Fusion360CommandBase):
         item_attributes = input_values['selection'][0].attributes
         item_attributes.add(input_values['attribute_group'], input_values['attribute_name'],
                             input_values['attribute_value'])
+        
+        FusionTaggerCommand.last_used_group = input_values['attribute_group']
+        FusionTaggerCommand.last_used_name = input_values['attribute_name']
 
     # Run when the user selects your command icon from the Fusion 360 UI
     # Typically used to create and display a command dialog box
     # The following is a basic sample of a dialog UI
     def on_create(self, command, command_inputs):
 
-        command_inputs.addSelectionInput('selection', 'select something', 'Select something to add an attribute')
-        command_inputs.addStringValueInput('attribute_group', 'Group', 'ATTR_Group')
-        command_inputs.addStringValueInput('attribute_name', 'Name', 'ATTR_Name')
-        command_inputs.addStringValueInput('attribute_value', 'Value', 'ATTR_Value')
+        selection = command_inputs.addSelectionInput('selection', 'select something', 'Select something to add an attribute')
+        selection.setSelectionLimits(1)
+        command_inputs.addStringValueInput('attribute_group', 'Group', FusionTaggerCommand.last_used_group)
+        command_inputs.addStringValueInput('attribute_name', 'Name', FusionTaggerCommand.last_used_name)
+        command_inputs.addStringValueInput('attribute_value', 'Value', '')

@@ -33,22 +33,35 @@ class FusionTaggerViewerCommand(Fusion360CommandBase):
         ao = get_app_objects()
 
         attributes = ao['design'].findAttributes(input_values['attribute_group'], input_values['attribute_name'])
+        selectedEntities = [s.entity for s in ao['ui'].activeSelections]
 
-        if len(attributes) > 0:
-            message_string = ''
+        if (len(selectedEntities) == 0):
+            message_string = 'Found attributes in ALL entities:\n\n'
+        else:
+            message_string = 'Found attributes in SELECTED entities:\n\n'
 
-            for attribute in attributes:
+        num_attrs = 0
 
-                message_string += attribute.groupName
-                message_string += ' , '
-                message_string += attribute.name
-                message_string += ' , '
-                message_string += attribute.value
-                message_string += ' , '
+        for attribute in attributes:
+            if (len(selectedEntities) != 0 and not attribute.parent in selectedEntities):
+                continue;
+
+            message_string += attribute.groupName
+            message_string += ' , '
+            message_string += attribute.name
+            message_string += ' , '
+            message_string += attribute.value
+            message_string += ' , '
+            # SketchPoint for example does not have a name
+            if (hasattr(attribute.parent, 'name')):
                 message_string += attribute.parent.name
                 message_string += '\n'
-        else:
-            message_string = 'No Atrributes Found'
+            else:
+                message_string += '[' + attribute.parent.objectType + ']\n'
+
+            num_attrs = num_attrs + 1
+
+        if (num_attrs == 0): message_string += 'No attributes found'            
 
         ao['ui'].messageBox(message_string)
 
@@ -57,9 +70,5 @@ class FusionTaggerViewerCommand(Fusion360CommandBase):
     # The following is a basic sample of a dialog UI
     def on_create(self, command, command_inputs):
 
-        # TODO add some text explaining the filters below and remove defaults.
-        message = 'Type the value of the group or attribute you want to find in the document.\n ' \
-                  'Leave blank for all values'
-        returnValue = command_inputs.addTextBoxCommandInput('text_box', 'Instructions', message, 3, True)
-        command_inputs.addStringValueInput('attribute_group', 'Group', '**GroupName**')
+        command_inputs.addStringValueInput('attribute_group', 'Group', '')
         command_inputs.addStringValueInput('attribute_name', 'Name', '')
