@@ -32,8 +32,15 @@ class FusionTaggerCommand(Fusion360CommandBase):
     # This is typically where your main program logic would go
     def on_execute(self, command, inputs, args, input_values):
         item_attributes = input_values['selection'][0].attributes
-        item_attributes.add(input_values['attribute_group'], input_values['attribute_name'],
-                            input_values['attribute_value'])
+        
+        if (input_values['attribute_value'] != ''):
+            # will add or update attribute value
+            item_attributes.add(input_values['attribute_group'], input_values['attribute_name'], input_values['attribute_value'])
+        else:
+            # will delete the attribute for empty value entered
+            attrib = item_attributes.itemByName(input_values['attribute_group'], input_values['attribute_name'])
+            if (attrib):
+                attrib.deleteMe()
         
         FusionTaggerCommand.last_used_group = input_values['attribute_group']
         FusionTaggerCommand.last_used_name = input_values['attribute_name']
