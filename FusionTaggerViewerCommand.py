@@ -53,11 +53,13 @@ class FusionTaggerViewerCommand(Fusion360CommandBase):
             message_string += attribute.value
             message_string += ' , '
             # SketchPoint for example does not have a name
-            if (hasattr(attribute.parent, 'name')):
+            if hasattr(attribute.parent, 'name'):
                 message_string += attribute.parent.name
                 message_string += '\n'
+            elif hasattr(attribute.parent, 'objectType'):
+                message_string += '[' + str(attribute.parent.objectType) + ']\n'
             else:
-                message_string += '[' + attribute.parent.objectType + ']\n'
+                message_string += '[' + str(type(attribute.parent)) + ']\n'
 
             num_attrs = num_attrs + 1
 
